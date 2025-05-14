@@ -1,0 +1,9 @@
+{
+  "name": "Authoring",
+  "references": [
+    "Unity.Burst",
+    "Unity.Mathematics",
+    "Unity.Collections",
+    "Unity.Entities"
+  ]
+}

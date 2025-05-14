@@ -1,0 +1,9 @@
+{
+  "name": "Components",
+  "references": [
+    "Unity.Burst",
+    "Unity.Mathematics",
+    "Unity.Collections",
+    "Unity.Entities"
+  ]
+}
