@@ -15,10 +15,10 @@ namespace Authoring
 
             var oldMatrix = matrix;
             matrix = new float[colors.Length * colors.Length];
-            GenerateIdentityMatrix(oldMatrix);
+            ExpandIdentityMatrix(oldMatrix);
         }
 
-        private void GenerateIdentityMatrix(float[] oldMatrix = null)
+        private void ExpandIdentityMatrix(float[] oldMatrix = null)
         {
             var oldColorCount = 0;
             if (oldMatrix != null)
@@ -40,8 +40,32 @@ namespace Authoring
             }
         }
 
+        [ContextMenu("Clear Matrix")]
+        private void ClearMatrix()
+        {
+            for (var i = 0; i < colors.Length; i++)
+            {
+                for (var j = 0; j < colors.Length; j++)
+                {
+                    matrix[colors.Length * i + j] = 0.0f;
+                }
+            }
+        }
+
+        [ContextMenu("Generate Identity Matrix")]
+        private void GenerateIdentityMatrix()
+        {
+            for (var i = 0; i < colors.Length; i++)
+            {
+                for (var j = 0; j < colors.Length; j++)
+                {
+                    matrix[colors.Length * i + j] = i == j ? 1.0f : 0.0f;
+                }
+            }
+        }
+
         [ContextMenu("Generate Random Matrix")]
-        public void GenerateRandomMatrix()
+        private void GenerateRandomMatrix()
         {
             for (var i = 0; i < colors.Length; i++)
             {

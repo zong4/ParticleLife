@@ -41,14 +41,14 @@ namespace UI
                 {
                     rectTransform.anchorMin = new Vector2(0, 1 - totalSize - sizePercent[i]);
                     rectTransform.anchorMax = new Vector2(1, 1 - totalSize);
-                    totalSize += sizePercent[i];
                 }
                 else
                 {
                     rectTransform.anchorMin = new Vector2(totalSize, 0);
                     rectTransform.anchorMax = new Vector2(totalSize + sizePercent[i], 1);
-                    totalSize += sizePercent[i];
                 }
+
+                totalSize += sizePercent[i];
             }
         }
     }
