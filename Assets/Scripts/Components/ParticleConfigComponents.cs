@@ -13,6 +13,7 @@ namespace Components
     public struct ParticleSimulationConfigComponent : IComponentData
     {
         public float Scale;
+        public float AttractionMiddleUnit;
         public float AttractionDistanceUnit;
         public float ForceStrength;
         public float DampingFactor;

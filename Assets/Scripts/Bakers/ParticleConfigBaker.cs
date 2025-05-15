@@ -20,6 +20,7 @@ namespace Bakers
                 new ParticleSimulationConfigComponent()
                 {
                     Scale = authoring.scale,
+                    AttractionMiddleUnit = authoring.attractionMiddleUnit,
                     AttractionDistanceUnit = authoring.attractionDistanceUnit,
                     ForceStrength = authoring.forceStrength,
                     DampingFactor = authoring.dampingFactor,

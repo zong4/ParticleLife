@@ -188,7 +188,8 @@ MonoBehaviour:
   minPosition: {x: -8, y: -5.5}
   maxPosition: {x: 8, y: 5.5}
   scale: 0.1
-  attractionDistanceUnit: 24.27
+  attractionMiddleUnit: 10
+  attractionDistanceUnit: 20
   forceStrength: 6
   dampingFactor: 0.8
 --- !u!114 &502730041

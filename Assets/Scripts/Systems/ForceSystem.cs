@@ -76,26 +76,49 @@ namespace Systems
                 var colorIndexA = ColorIndices[i];
                 var posA = Positions[i];
 
-                var totalForce = float2.zero;
+                var totalForceDir = float2.zero;
                 for (var j = 0; j < Positions.Length; j++)
                 {
                     if (i == j) continue;
 
                     var dir = Positions[j] - posA;
                     var dist = math.length(dir);
-                    if (!(dist < ConfigComponent.Scale * ConfigComponent.AttractionDistanceUnit)) continue;
+                    if (dist > ConfigComponent.Scale * ConfigComponent.AttractionDistanceUnit) continue;
 
-                    var unitDir = math.normalizesafe(dir);
+                    var radius = ConfigComponent.Scale * 0.5f;
+                    var maxDist = ConfigComponent.Scale * ConfigComponent.AttractionDistanceUnit;
                     var attraction =
                         MatrixComponent.AttractionMatrix.Value.Matrix[
                             colorIndexA * MatrixComponent.ColorCount + ColorIndices[j]];
-                    var distanceEffect =
-                        math.pow(1 - dist / (ConfigComponent.Scale * ConfigComponent.AttractionDistanceUnit), 1);
+                    
+                    // {
+                    //     var attrFactor = attraction * math.pow(1 - dist / maxDist, 1);
+                    //     var repulsionFactor = -math.pow((maxDist - dist) / (maxDist - radius), 1.0f); // 0.9 and 1.0
+                    //
+                    //     totalForceDir += math.normalizesafe(dir) * (attrFactor + repulsionFactor);
+                    // }
 
-                    totalForce += unitDir * (attraction * distanceEffect);
+                    {
+                        var beta = ConfigComponent.Scale * ConfigComponent.AttractionMiddleUnit;
+                        
+                        float factor;
+                        if (dist <= radius)
+                        {
+                            factor = dist / radius - 1;
+                        }
+                        else if(dist <= beta)
+                        {
+                            factor = attraction * (dist - radius) / (beta - radius);
+                        }
+                        else
+                        {
+                            factor = attraction * (maxDist - dist) / (maxDist - beta);
+                        }
+                        totalForceDir += math.normalizesafe(dir) * factor;
+                    }
                 }
 
-                Velocities[i] += totalForce * (ConfigComponent.ForceStrength * DeltaTime);
+                Velocities[i] += totalForceDir * (ConfigComponent.ForceStrength * DeltaTime);
                 Velocities[i] *= ConfigComponent.DampingFactor;
             }
         }

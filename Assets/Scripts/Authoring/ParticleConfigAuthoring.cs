@@ -11,6 +11,7 @@ namespace Authoring
 
         // Single particle properties
         public float scale;
+        public float attractionMiddleUnit;
         public float attractionDistanceUnit;
         public float forceStrength;
         public float dampingFactor;
