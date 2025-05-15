@@ -24,6 +24,9 @@ namespace Systems
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
+            var configComponent = SystemAPI.GetSingleton<ParticleSimulationConfigComponent>();
+            var matrixComponent = SystemAPI.GetSingleton<AttractionMatrixComponent>();
+
             var particles = _particleQuery.ToComponentDataArray<Particle>(Allocator.TempJob);
             var colorIndices = new NativeArray<int>(particles.Length, Allocator.TempJob);
             var positions = new NativeArray<float2>(particles.Length, Allocator.TempJob);
@@ -35,14 +38,21 @@ namespace Systems
                 velocities[i] = particles[i].Velocity;
             }
 
+            var deltaTime = SystemAPI.Time.DeltaTime;
+            var frictionFactor = CalFrictionFactor(deltaTime, configComponent.FrictionHalfLife,
+                configComponent.FrictionFactor);
             var job = new ForceJob
             {
-                DeltaTime = SystemAPI.Time.DeltaTime,
+                // Single
                 ColorIndices = colorIndices,
                 Positions = positions,
                 Velocities = velocities,
-                ConfigComponent = SystemAPI.GetSingleton<ParticleSimulationConfigComponent>(),
-                MatrixComponent = SystemAPI.GetSingleton<AttractionMatrixComponent>(),
+
+                // Global
+                DeltaTime = deltaTime,
+                FrictionFactor = frictionFactor,
+                ConfigComponent = configComponent,
+                MatrixComponent = matrixComponent,
             };
             job.ScheduleParallel(particles.Length, 64, state.Dependency).Complete();
 
@@ -64,10 +74,14 @@ namespace Systems
         [BurstCompile]
         private struct ForceJob : IJobFor
         {
-            [ReadOnly] public float DeltaTime;
+            // Single
             [ReadOnly] public NativeArray<int> ColorIndices;
             [ReadOnly] public NativeArray<float2> Positions;
             public NativeArray<float2> Velocities;
+
+            // Global
+            [ReadOnly] public float DeltaTime;
+            [ReadOnly] public float FrictionFactor;
             [ReadOnly] public ParticleSimulationConfigComponent ConfigComponent;
             [ReadOnly] public AttractionMatrixComponent MatrixComponent;
 
@@ -83,14 +97,13 @@ namespace Systems
 
                     var dir = Positions[j] - posA;
                     var dist = math.length(dir);
-                    if (dist > ConfigComponent.Scale * ConfigComponent.AttractionDistanceUnit) continue;
+                    if (!(dist < ConfigComponent.MaxAttractionDistance)) continue;
 
-                    var radius = ConfigComponent.Scale * 0.5f;
-                    var maxDist = ConfigComponent.Scale * ConfigComponent.AttractionDistanceUnit;
-                    var attraction =
+                    var f = CalForce(dist / ConfigComponent.MaxAttractionDistance,
                         MatrixComponent.AttractionMatrix.Value.Matrix[
-                            colorIndexA * MatrixComponent.ColorCount + ColorIndices[j]];
-                    
+                            colorIndexA * MatrixComponent.ColorCount + ColorIndices[j]], 0.3f);
+                    totalForceDir += dir * (f / dist);
+
                     // {
                     //     var attrFactor = attraction * math.pow(1 - dist / maxDist, 1);
                     //     var repulsionFactor = -math.pow((maxDist - dist) / (maxDist - radius), 1.0f); // 0.9 and 1.0
@@ -98,29 +111,54 @@ namespace Systems
                     //     totalForceDir += math.normalizesafe(dir) * (attrFactor + repulsionFactor);
                     // }
 
-                    {
-                        var beta = ConfigComponent.Scale * ConfigComponent.AttractionMiddleUnit;
-                        
-                        float factor;
-                        if (dist <= radius)
-                        {
-                            factor = dist / radius - 1;
-                        }
-                        else if(dist <= beta)
-                        {
-                            factor = attraction * (dist - radius) / (beta - radius);
-                        }
-                        else
-                        {
-                            factor = attraction * (maxDist - dist) / (maxDist - beta);
-                        }
-                        totalForceDir += math.normalizesafe(dir) * factor;
-                    }
+                    // {
+                    //     var beta = ConfigComponent.Scale * ConfigComponent.AttractionMiddleUnit;
+                    //     
+                    //     float factor;
+                    //     if (dist <= radius)
+                    //     {
+                    //         factor = dist / radius - 1;
+                    //     }
+                    //     else if(dist <= beta)
+                    //     {
+                    //         factor = attraction * (dist - radius) / (beta - radius);
+                    //     }
+                    //     else
+                    //     {
+                    //         factor = attraction * (maxDist - dist) / (maxDist - beta);
+                    //     }
+                    //     totalForceDir += math.normalizesafe(dir) * factor;
+                    // }
                 }
 
+                Velocities[i] *= FrictionFactor;
                 Velocities[i] += totalForceDir * (ConfigComponent.ForceStrength * DeltaTime);
-                Velocities[i] *= ConfigComponent.DampingFactor;
             }
+        }
+
+        [BurstCompile]
+        private static float CalFrictionFactor(float deltaTime, float frictionHalfLife, float taylor1)
+        {
+            // var frictionFactor = math.pow(0.5f, deltaTime / configComponent.FrictionHalfLife);
+            var taylor2 = -math.LN2 / frictionHalfLife * taylor1 * (deltaTime - 0.3333333f);
+            var taylor3 = -math.LN2 / frictionHalfLife * taylor2 * (deltaTime - 0.3333333f) / 2;
+            return taylor1 + taylor2 + taylor3;
+        }
+
+        [BurstCompile]
+        private static float CalForce(float r, float a, float beta)
+        {
+            if (r < beta)
+            {
+                return r / beta - 1;
+            }
+
+            if (r > beta && r < 1)
+            {
+                return a * (1 - math.abs(2 * r - 1 - beta) / (1 - beta));
+            }
+
+            return 0.0f;
         }
     }
 }

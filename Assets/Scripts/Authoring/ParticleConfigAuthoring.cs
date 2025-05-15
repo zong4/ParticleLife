@@ -1,4 +1,5 @@
 using UnityEngine;
+using Core;
 
 namespace Authoring
 {
@@ -9,11 +10,10 @@ namespace Authoring
         public Vector2 minPosition;
         public Vector2 maxPosition;
 
-        // Single particle properties
-        public float scale;
-        public float attractionMiddleUnit;
+        // Simulation
+        [ReadOnly] public float scale = 0.1f;
         public float attractionDistanceUnit;
         public float forceStrength;
-        public float dampingFactor;
+        public float frictionHalfLife;
     }
 }

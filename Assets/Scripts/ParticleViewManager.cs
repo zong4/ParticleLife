@@ -11,6 +11,7 @@ public class ParticleViewManager : MonoBehaviour
     public GameObject particlePrefab;
     private readonly Dictionary<Entity, GameObject> _views = new();
 
+    // Once time properties
     private float _scale;
     private Color[] _colors;
 
@@ -18,6 +19,7 @@ public class ParticleViewManager : MonoBehaviour
     {
         _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
+        // Once time properties
         _scale = FindObjectOfType<ParticleConfigAuthoring>().scale;
         _colors = FindObjectOfType<AttractionMatrixAuthoring>().colors;
     }

@@ -1,6 +1,7 @@
 using Authoring;
 using Components;
 using Unity.Entities;
+using Unity.Mathematics;
 
 namespace Bakers
 {
@@ -16,15 +17,14 @@ namespace Bakers
                     MinPosition = authoring.minPosition,
                     MaxPosition = authoring.maxPosition,
                 });
-            AddComponent(entity,
-                new ParticleSimulationConfigComponent()
-                {
-                    Scale = authoring.scale,
-                    AttractionMiddleUnit = authoring.attractionMiddleUnit,
-                    AttractionDistanceUnit = authoring.attractionDistanceUnit,
-                    ForceStrength = authoring.forceStrength,
-                    DampingFactor = authoring.dampingFactor,
-                });
+            AddComponent(entity, new ParticleSimulationConfigComponent()
+            {
+                MaxAttractionDistance = authoring.scale * authoring.attractionDistanceUnit,
+                ForceStrength = authoring.forceStrength,
+                FrictionHalfLife = authoring.frictionHalfLife,
+                FrictionFactor = math.pow(0.5f, 0.3333333f / authoring.frictionHalfLife),
+                // FrictionFactor = 0.00310039447f,
+            });
 
             UnityEngine.Debug.Log("ParticleConfigBaker");
         }

@@ -17,7 +17,7 @@ namespace Bakers
             {
                 for (var j = 0; j < authoring.colors.Length; j++)
                 {
-                    flatMatrix[i * authoring.colors.Length + j] = authoring.Matrix[i, j];
+                    flatMatrix[i * authoring.colors.Length + j] = authoring.matrix[i * authoring.colors.Length + j];
                 }
             }
 

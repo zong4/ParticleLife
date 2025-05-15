@@ -2,6 +2,7 @@ using Components;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using UnityEngine;
 
 namespace Systems
 {
@@ -20,11 +21,13 @@ namespace Systems
         {
             if (_initialized) return;
 
-            // DOTS
+            var seed = (uint)UnityEngine.Random.Range(1, 100000);
+            Debug.Log("Random seed: " + seed);
+            var rand = new Unity.Mathematics.Random(seed);
+
             var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
             var archetype = entityManager.CreateArchetype(typeof(Particle), typeof(LocalToWorld));
 
-            var rand = new Random((uint)UnityEngine.Random.Range(1, 100000));
             var configComponent = SystemAPI.GetSingleton<ParticleInitConfigComponent>();
             var colorCount = SystemAPI.GetSingleton<AttractionMatrixComponent>().ColorCount;
             for (var i = 0; i < configComponent.ParticleCount; i++)

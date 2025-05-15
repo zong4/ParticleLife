@@ -12,10 +12,9 @@ namespace Components
 
     public struct ParticleSimulationConfigComponent : IComponentData
     {
-        public float Scale;
-        public float AttractionMiddleUnit;
-        public float AttractionDistanceUnit;
+        public float MaxAttractionDistance;
         public float ForceStrength;
-        public float DampingFactor;
+        public float FrictionHalfLife;
+        public float FrictionFactor;
     }
 }

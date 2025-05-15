@@ -18,11 +18,9 @@ namespace Systems
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            var job = new MovementJob
-            {
-                DeltaTime = SystemAPI.Time.DeltaTime,
-                ConfigComponent = SystemAPI.GetSingleton<BoundaryConfigComponent>()
-            };
+            var configComponent = SystemAPI.GetSingleton<BoundaryConfigComponent>();
+
+            var job = new MovementJob { DeltaTime = SystemAPI.Time.DeltaTime, ConfigComponent = configComponent };
             job.ScheduleParallel();
         }
 

@@ -172,6 +172,16 @@ MonoBehaviour:
   - {r: 1, g: 0, b: 0, a: 1}
   - {r: 0, g: 0.06844139, b: 1, a: 1}
   - {r: 0, g: 1, b: 0.13710809, a: 1}
+  matrix:
+  - 1
+  - 0
+  - 0
+  - 0
+  - 1
+  - 0
+  - 0
+  - 0
+  - 1
 --- !u!114 &502730040
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -188,10 +198,9 @@ MonoBehaviour:
   minPosition: {x: -8, y: -5.5}
   maxPosition: {x: 8, y: 5.5}
   scale: 0.1
-  attractionMiddleUnit: 10
-  attractionDistanceUnit: 20
-  forceStrength: 6
-  dampingFactor: 0.8
+  attractionDistanceUnit: 8
+  forceStrength: 1
+  frictionHalfLife: 0.04
 --- !u!114 &502730041
 MonoBehaviour:
   m_ObjectHideFlags: 0
