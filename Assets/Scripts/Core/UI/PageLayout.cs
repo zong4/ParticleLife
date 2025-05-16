@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Core.UI
@@ -6,43 +7,60 @@ namespace Core.UI
     [ExecuteInEditMode]
     public class PageLayout : MonoBehaviour
     {
-        public bool isVertical = true;
-        public float[] sizePercent;
+        public enum Layout
+        {
+            Vertical,
+            Horizontal,
+        }
+
+        public Layout layout = Layout.Vertical;
+        public List<float> sizePercent;
 
         public void OnValidate()
         {
-            if (sizePercent != null && sizePercent.Length == transform.childCount)
+            if (sizePercent != null && sizePercent.Count == transform.childCount)
                 return;
 
-            ResetEqualSizePercent();
+            sizePercent ??= new List<float>();
+            while (transform.childCount > sizePercent.Count)
+            {
+                sizePercent.Add(0);
+            }
+
+            if (transform.childCount < sizePercent.Count)
+            {
+                sizePercent.RemoveRange(transform.childCount, sizePercent.Count - transform.childCount);
+            }
         }
 
         [ContextMenu("Reset Equal Size Percent")]
         private void ResetEqualSizePercent()
         {
-            sizePercent = new float[transform.childCount];
-
-            for (var i = 0; i < sizePercent.Length; i++)
+            sizePercent = new List<float>();
+            for (var i = 0; i < transform.childCount; i++)
             {
-                sizePercent[i] = 1.0f / sizePercent.Length;
+                sizePercent.Add(1.0f / transform.childCount);
             }
         }
 
         private void Update()
         {
             var totalSize = 0f;
-            for (var i = 0; i < Math.Min(transform.childCount, sizePercent.Length); i++)
+            for (var i = 0; i < Math.Min(transform.childCount, sizePercent.Count); i++)
             {
                 var rectTransform = transform.GetChild(i).GetComponent<RectTransform>();
-                if (isVertical)
+                switch (layout)
                 {
-                    rectTransform.anchorMin = new Vector2(0, 1 - totalSize - sizePercent[i]);
-                    rectTransform.anchorMax = new Vector2(1, 1 - totalSize);
-                }
-                else
-                {
-                    rectTransform.anchorMin = new Vector2(totalSize, 0);
-                    rectTransform.anchorMax = new Vector2(totalSize + sizePercent[i], 1);
+                    case Layout.Vertical:
+                        rectTransform.anchorMin = new Vector2(0, 1 - totalSize - sizePercent[i]);
+                        rectTransform.anchorMax = new Vector2(1, 1 - totalSize);
+                        break;
+                    case Layout.Horizontal:
+                        rectTransform.anchorMin = new Vector2(totalSize, 0);
+                        rectTransform.anchorMax = new Vector2(totalSize + sizePercent[i], 1);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
 
                 totalSize += sizePercent[i];

@@ -16,7 +16,7 @@ namespace Systems
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<ParticleSimulationConfigComponent>();
-            state.RequireForUpdate<AttractionMatrixComponent>();
+            state.RequireForUpdate<ColorConfigComponent>();
 
             _particleQuery = SystemAPI.QueryBuilder().WithAll<Particle>().Build();
         }
@@ -24,10 +24,10 @@ namespace Systems
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            var simulationConfigComponent = SystemAPI.GetSingleton<ParticleSimulationConfigComponent>();
-            if (!simulationConfigComponent.SimulationEnabled) return;
+            var simulationComponent = SystemAPI.GetSingleton<ParticleSimulationConfigComponent>();
+            if (!simulationComponent.SimulationEnabled) return;
 
-            var matrixComponent = SystemAPI.GetSingleton<AttractionMatrixComponent>();
+            var colorComponent = SystemAPI.GetSingleton<ColorConfigComponent>();
 
             var particles = _particleQuery.ToComponentDataArray<Particle>(Allocator.TempJob);
             var colorIndices = new NativeArray<int>(particles.Length, Allocator.TempJob);
@@ -41,8 +41,8 @@ namespace Systems
             }
 
             var deltaTime = SystemAPI.Time.DeltaTime;
-            var frictionFactor = CalFrictionFactor(deltaTime, simulationConfigComponent.FrictionHalfLife,
-                simulationConfigComponent.FrictionFactor);
+            var frictionFactor = CalFrictionFactor(deltaTime, simulationComponent.FrictionHalfLife,
+                simulationComponent.FrictionFactor);
             var job = new ForceJob
             {
                 // Single
@@ -53,8 +53,8 @@ namespace Systems
                 // Global
                 DeltaTime = deltaTime,
                 FrictionFactor = frictionFactor,
-                ConfigComponent = simulationConfigComponent,
-                MatrixComponent = matrixComponent,
+                SimulationComponent = simulationComponent,
+                ColorComponent = colorComponent,
             };
             job.ScheduleParallel(particles.Length, 64, state.Dependency).Complete();
 
@@ -84,8 +84,8 @@ namespace Systems
             // Global
             [ReadOnly] public float DeltaTime;
             [ReadOnly] public float FrictionFactor;
-            [ReadOnly] public ParticleSimulationConfigComponent ConfigComponent;
-            [ReadOnly] public AttractionMatrixComponent MatrixComponent;
+            [ReadOnly] public ParticleSimulationConfigComponent SimulationComponent;
+            [ReadOnly] public ColorConfigComponent ColorComponent;
 
             public void Execute(int i)
             {
@@ -99,11 +99,11 @@ namespace Systems
 
                     var dir = Positions[j] - posA;
                     var dist = math.length(dir);
-                    if (!(dist < ConfigComponent.MaxAttractionDistance)) continue;
+                    if (!(dist < SimulationComponent.MaxAttractionDistance)) continue;
 
-                    var f = CalForce(dist / ConfigComponent.MaxAttractionDistance,
-                        MatrixComponent.AttractionMatrix.Value.Matrix[
-                            colorIndexA * MatrixComponent.ColorCount + ColorIndices[j]], 0.3f);
+                    var f = CalForce(dist / SimulationComponent.MaxAttractionDistance,
+                        ColorComponent.AttractionMatrix.Value.Matrix[
+                            colorIndexA * ColorComponent.ColorCount + ColorIndices[j]], 0.3f);
                     totalForceDir += dir * (f / dist);
 
                     // {
@@ -134,7 +134,7 @@ namespace Systems
                 }
 
                 Velocities[i] *= FrictionFactor;
-                Velocities[i] += totalForceDir * (ConfigComponent.ForceStrength * DeltaTime);
+                Velocities[i] += totalForceDir * (SimulationComponent.ForceStrength * DeltaTime);
             }
         }
 

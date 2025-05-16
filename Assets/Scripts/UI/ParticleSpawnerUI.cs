@@ -66,7 +66,7 @@ namespace UI
             }
         }
 
-        public void ChangeCount(string str)
+        public void SetCount(string str)
         {
             if (!int.TryParse(str, out var result)) return;
             _count = result;

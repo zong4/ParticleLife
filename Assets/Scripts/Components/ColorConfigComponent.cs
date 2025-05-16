@@ -7,7 +7,7 @@ namespace Components
         public BlobArray<float> Matrix;
     }
 
-    public struct AttractionMatrixComponent : IComponentData
+    public struct ColorConfigComponent : IComponentData
     {
         public int ColorCount;
         public BlobAssetReference<AttractionMatrixBlob> AttractionMatrix;

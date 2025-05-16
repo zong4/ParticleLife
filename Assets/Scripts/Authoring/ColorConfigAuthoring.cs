@@ -4,7 +4,7 @@ using Random = UnityEngine.Random;
 
 namespace Authoring
 {
-    public class AttractionMatrixAuthoring : MonoBehaviour
+    public class ColorConfigAuthoring : MonoBehaviour
     {
         public Color[] colors;
         public float[] matrix;

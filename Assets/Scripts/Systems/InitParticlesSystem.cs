@@ -18,7 +18,7 @@ namespace Systems
             _rand = new Unity.Mathematics.Random(seed);
 
             RequireForUpdate<ParticleCreateRequestComponent>();
-            RequireForUpdate<AttractionMatrixComponent>();
+            RequireForUpdate<ColorConfigComponent>();
         }
 
         protected override void OnUpdate()
@@ -33,7 +33,7 @@ namespace Systems
             var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
             var archetype = entityManager.CreateArchetype(typeof(Particle), typeof(LocalToWorld));
 
-            var colorCount = SystemAPI.GetSingleton<AttractionMatrixComponent>().ColorCount;
+            var colorCount = SystemAPI.GetSingleton<ColorConfigComponent>().ColorCount;
             for (var i = 0; i < request.Count; i++)
             {
                 var e = entityManager.CreateEntity(archetype);

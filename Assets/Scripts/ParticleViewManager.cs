@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using Authoring;
 using Components;
+using UI;
 
 public class ParticleViewManager : MonoBehaviour
 {
@@ -13,7 +14,7 @@ public class ParticleViewManager : MonoBehaviour
 
     // Properties
     private float _scale;
-    private Color[] _colors;
+    private List<Color> _colors;
 
     private void Start()
     {
@@ -21,7 +22,7 @@ public class ParticleViewManager : MonoBehaviour
 
         // Properties
         _scale = FindObjectOfType<ParticleSimulationConfigAuthoring>().scale;
-        _colors = FindObjectOfType<AttractionMatrixAuthoring>().colors;
+        _colors = FindObjectOfType<ColorConfigUI>().colors;
     }
 
     private void Update()

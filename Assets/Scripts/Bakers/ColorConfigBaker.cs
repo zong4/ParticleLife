@@ -5,9 +5,9 @@ using Unity.Entities;
 
 namespace Bakers
 {
-    public class AttractionMatrixBaker : Baker<AttractionMatrixAuthoring>
+    public class ColorConfigBaker : Baker<ColorConfigAuthoring>
     {
-        public override void Bake(AttractionMatrixAuthoring authoring)
+        public override void Bake(ColorConfigAuthoring authoring)
         {
             var builder = new BlobBuilder(Allocator.Temp);
             ref var root = ref builder.ConstructRoot<AttractionMatrixBlob>();
@@ -26,7 +26,7 @@ namespace Bakers
 
             var entity = GetEntity(TransformUsageFlags.None);
             AddComponent(entity,
-                new AttractionMatrixComponent { ColorCount = authoring.colors.Length, AttractionMatrix = blobRef });
+                new ColorConfigComponent() { ColorCount = authoring.colors.Length, AttractionMatrix = blobRef });
 
             UnityEngine.Debug.Log("AttractionMatrixBaker");
         }

@@ -24,7 +24,7 @@ namespace UI
             _particleSimulationAuthoring = FindObjectOfType<ParticleSimulationConfigAuthoring>();
         }
 
-        public void FlapSimulationState()
+        public void FlipSimulationState()
         {
             var data = _entityManager.GetComponentData<ParticleSimulationConfigComponent>(_particleSimulationConfig);
             data.SimulationEnabled = !data.SimulationEnabled;
@@ -35,7 +35,7 @@ namespace UI
             simulationEnabledText.text = data.SimulationEnabled ? "Simulate" : "Pause";
         }
 
-        public void ChangeMaxAttractionDistanceUnit(string str)
+        public void SetMaxAttractionDistanceUnit(string str)
         {
             if (!float.TryParse(str, out var result)) return;
 
@@ -46,7 +46,7 @@ namespace UI
             _particleSimulationAuthoring.maxAttractionDistanceUnit = data.MaxAttractionDistance;
         }
 
-        public void ChangeForceStrength(string str)
+        public void SetForceStrength(string str)
         {
             if (!float.TryParse(str, out var result)) return;
 
@@ -57,7 +57,7 @@ namespace UI
             _particleSimulationAuthoring.forceStrength = data.ForceStrength;
         }
 
-        public void ChangeFrictionHalfLife(string str)
+        public void SetFrictionHalfLife(string str)
         {
             if (!float.TryParse(str, out var result)) return;
 
