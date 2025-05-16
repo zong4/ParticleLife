@@ -12,7 +12,7 @@ namespace Bakers
             AddComponent(entity,
                 new BoundaryConfigComponent()
                 {
-                    IsBoundaryEnabled = authoring.isBoundaryEnabled,
+                    BoundaryEnabled = authoring.boundaryEnabled,
                     MinPosition = authoring.minPosition,
                     MaxPosition = authoring.maxPosition,
                 });

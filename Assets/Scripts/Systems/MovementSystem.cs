@@ -12,15 +12,18 @@ namespace Systems
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
+            state.RequireForUpdate<ParticleSimulationConfigComponent>();
             state.RequireForUpdate<BoundaryConfigComponent>();
         }
 
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            var configComponent = SystemAPI.GetSingleton<BoundaryConfigComponent>();
+            var simulationComponent = SystemAPI.GetSingleton<ParticleSimulationConfigComponent>();
+            if (!simulationComponent.SimulationEnabled) return;
 
-            var job = new MovementJob { DeltaTime = SystemAPI.Time.DeltaTime, ConfigComponent = configComponent };
+            var boundaryComponent = SystemAPI.GetSingleton<BoundaryConfigComponent>();
+            var job = new MovementJob { DeltaTime = SystemAPI.Time.DeltaTime, BoundaryComponent = boundaryComponent };
             job.ScheduleParallel();
         }
 
@@ -28,17 +31,17 @@ namespace Systems
         private partial struct MovementJob : IJobEntity
         {
             public float DeltaTime;
-            public BoundaryConfigComponent ConfigComponent;
+            public BoundaryConfigComponent BoundaryComponent;
 
             private void Execute(ref Particle particle, ref LocalToWorld localToWorld)
             {
                 var pos = particle.Position;
                 pos += particle.Velocity * DeltaTime;
 
-                if (ConfigComponent.IsBoundaryEnabled)
+                if (BoundaryComponent.BoundaryEnabled)
                 {
-                    var min = ConfigComponent.MinPosition;
-                    var max = ConfigComponent.MaxPosition;
+                    var min = BoundaryComponent.MinPosition;
+                    var max = BoundaryComponent.MaxPosition;
                     if (pos.x < min.x || pos.x > max.x)
                     {
                         particle.Velocity.x = 0;

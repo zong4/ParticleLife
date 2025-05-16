@@ -1,14 +1,13 @@
 using System;
 using UnityEngine;
 
-namespace UI
+namespace Core.UI
 {
     [ExecuteInEditMode]
     public class PageLayout : MonoBehaviour
     {
         public bool isVertical = true;
         public float[] sizePercent;
-        private RectTransform[] _rectTransforms;
 
         public void OnValidate()
         {
@@ -22,12 +21,10 @@ namespace UI
         private void ResetEqualSizePercent()
         {
             sizePercent = new float[transform.childCount];
-            _rectTransforms = new RectTransform[transform.childCount];
 
             for (var i = 0; i < sizePercent.Length; i++)
             {
                 sizePercent[i] = 1.0f / sizePercent.Length;
-                _rectTransforms[i] = transform.GetChild(i).GetComponent<RectTransform>();
             }
         }
 
@@ -36,7 +33,7 @@ namespace UI
             var totalSize = 0f;
             for (var i = 0; i < Math.Min(transform.childCount, sizePercent.Length); i++)
             {
-                var rectTransform = _rectTransforms[i];
+                var rectTransform = transform.GetChild(i).GetComponent<RectTransform>();
                 if (isVertical)
                 {
                     rectTransform.anchorMin = new Vector2(0, 1 - totalSize - sizePercent[i]);

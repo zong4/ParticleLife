@@ -3,16 +3,11 @@ using Core;
 
 namespace Authoring
 {
-    public class ParticleConfigAuthoring : MonoBehaviour
+    public class ParticleSimulationConfigAuthoring : MonoBehaviour
     {
-        // Init
-        public int particleCount;
-        public Vector2 minPosition;
-        public Vector2 maxPosition;
-
-        // Simulation
+        public bool simulationEnabled;
         [ReadOnly] public float scale = 0.1f;
-        public float attractionDistanceUnit;
+        public float maxAttractionDistanceUnit;
         public float forceStrength;
         public float frictionHalfLife;
     }

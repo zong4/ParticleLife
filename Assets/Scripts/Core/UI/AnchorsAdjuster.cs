@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace UI
+namespace Core.UI
 {
     [ExecuteInEditMode]
     [RequireComponent(typeof(RectTransform))]

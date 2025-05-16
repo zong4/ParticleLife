@@ -9,40 +9,42 @@ namespace Systems
     [UpdateInGroup(typeof(InitializationSystemGroup))]
     public partial class InitParticlesSystem : SystemBase
     {
-        private bool _initialized;
+        private Unity.Mathematics.Random _rand;
 
         protected override void OnCreate()
         {
-            RequireForUpdate<ParticleInitConfigComponent>();
+            var seed = (uint)UnityEngine.Random.Range(1, 100000);
+            Debug.Log("Random seed: " + seed);
+            _rand = new Unity.Mathematics.Random(seed);
+
+            RequireForUpdate<ParticleCreateRequestComponent>();
             RequireForUpdate<AttractionMatrixComponent>();
         }
 
         protected override void OnUpdate()
         {
-            if (_initialized) return;
+            var query = World.EntityManager.CreateEntityQuery(typeof(ParticleCreateRequestComponent));
+            if (query.CalculateEntityCount() == 0)
+                return;
 
-            var seed = (uint)UnityEngine.Random.Range(1, 100000);
-            Debug.Log("Random seed: " + seed);
-            var rand = new Unity.Mathematics.Random(seed);
+            var requestEntity = query.GetSingletonEntity();
+            var request = SystemAPI.GetComponent<ParticleCreateRequestComponent>(requestEntity);
 
             var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
             var archetype = entityManager.CreateArchetype(typeof(Particle), typeof(LocalToWorld));
 
-            var configComponent = SystemAPI.GetSingleton<ParticleInitConfigComponent>();
             var colorCount = SystemAPI.GetSingleton<AttractionMatrixComponent>().ColorCount;
-            for (var i = 0; i < configComponent.ParticleCount; i++)
+            for (var i = 0; i < request.Count; i++)
             {
                 var e = entityManager.CreateEntity(archetype);
 
-                var pos = rand.NextFloat2(new float2(configComponent.MinPosition.x, configComponent.MinPosition.y),
-                    new float2(configComponent.MaxPosition.x, configComponent.MaxPosition.y));
-
+                var pos = _rand.NextFloat2(request.MinPosition, request.MaxPosition);
                 entityManager.SetComponentData(e,
-                    new Particle { ColorIndex = rand.NextInt(0, colorCount), Position = pos, Velocity = float2.zero });
+                    new Particle { ColorIndex = _rand.NextInt(0, colorCount), Position = pos, Velocity = float2.zero });
                 entityManager.SetComponentData(e, new LocalToWorld { Value = float4x4.Translate(new float3(pos, 0)) });
             }
 
-            _initialized = true;
+            entityManager.DestroyEntity(requestEntity);
         }
     }
 }

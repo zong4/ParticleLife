@@ -5,21 +5,15 @@ using Unity.Mathematics;
 
 namespace Bakers
 {
-    public class ParticleConfigBaker : Baker<ParticleConfigAuthoring>
+    public class ParticleConfigBaker : Baker<ParticleSimulationConfigAuthoring>
     {
-        public override void Bake(ParticleConfigAuthoring authoring)
+        public override void Bake(ParticleSimulationConfigAuthoring authoring)
         {
             var entity = GetEntity(TransformUsageFlags.None);
-            AddComponent(entity,
-                new ParticleInitConfigComponent()
-                {
-                    ParticleCount = authoring.particleCount,
-                    MinPosition = authoring.minPosition,
-                    MaxPosition = authoring.maxPosition,
-                });
             AddComponent(entity, new ParticleSimulationConfigComponent()
             {
-                MaxAttractionDistance = authoring.scale * authoring.attractionDistanceUnit,
+                SimulationEnabled = authoring.simulationEnabled,
+                MaxAttractionDistance = authoring.scale * authoring.maxAttractionDistanceUnit,
                 ForceStrength = authoring.forceStrength,
                 FrictionHalfLife = authoring.frictionHalfLife,
                 FrictionFactor = math.pow(0.5f, 0.3333333f / authoring.frictionHalfLife),

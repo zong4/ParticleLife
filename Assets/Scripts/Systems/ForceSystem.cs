@@ -24,7 +24,9 @@ namespace Systems
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            var configComponent = SystemAPI.GetSingleton<ParticleSimulationConfigComponent>();
+            var simulationConfigComponent = SystemAPI.GetSingleton<ParticleSimulationConfigComponent>();
+            if (!simulationConfigComponent.SimulationEnabled) return;
+
             var matrixComponent = SystemAPI.GetSingleton<AttractionMatrixComponent>();
 
             var particles = _particleQuery.ToComponentDataArray<Particle>(Allocator.TempJob);
@@ -39,8 +41,8 @@ namespace Systems
             }
 
             var deltaTime = SystemAPI.Time.DeltaTime;
-            var frictionFactor = CalFrictionFactor(deltaTime, configComponent.FrictionHalfLife,
-                configComponent.FrictionFactor);
+            var frictionFactor = CalFrictionFactor(deltaTime, simulationConfigComponent.FrictionHalfLife,
+                simulationConfigComponent.FrictionFactor);
             var job = new ForceJob
             {
                 // Single
@@ -51,7 +53,7 @@ namespace Systems
                 // Global
                 DeltaTime = deltaTime,
                 FrictionFactor = frictionFactor,
-                ConfigComponent = configComponent,
+                ConfigComponent = simulationConfigComponent,
                 MatrixComponent = matrixComponent,
             };
             job.ScheduleParallel(particles.Length, 64, state.Dependency).Complete();
