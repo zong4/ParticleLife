@@ -1,33 +1,42 @@
 # ParticleLife
 
-## Control
+A particle simulation sandbox where particles interact according to customizable rules. Design your own attraction matrix, spawn colorful particles, and watch emergent behavior unfold.
 
-### Camera Control
+## Basic Procedure
 
-`WASD`: Move the camera
+1. Click `Select area` to draw a boundary.
+2. Click `Spawn` to create particles in the selected region.
+3. Click `Pause`(or press `Space`) to switch into `Simulation` state.
+4. Try to adjust parameters to generate a variety of stunning visuals..
 
-`Mouse scroll`: Zoom in and out
+## Controls
 
-### Simulation Control
+### UI Controls
 
-`Space`: Continue or pause the simulation
-
-`R`: Clear the particles
-
-`B`: Start select boundary or clear boundary
-
-`<`: Decrease the number of force
-
-`>`: Increase the number of force
-
-### UI Control
-
-`M`: Open or close the menu
+`M`: Toggle menu
 
 `Escape`: Close the color picker
 
-## Todo
+### Camera Controls
 
-- [ ] Store settings in local storage
-- [ ] More beautiful ui and more options
-- [ ] 3D particles
+`W`, `A`, `S`, `D`: Move the camera
+
+`Mouse scroll`: Zoom in/out
+
+### Simulation Controller
+
+`Space`: Pause/resume the simulation
+
+`R`: Clear all particles
+
+`B`: Enter or exit boundary selection mode
+
+`<`: Decrease force magnitude
+
+`>`: Increase force magnitude
+
+## Todos
+
+- [ ] Store settings to local storage
+- [ ] Improved UI and extended customization
+- [ ] 3D particle support
