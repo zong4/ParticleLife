@@ -1,3 +1,6 @@
+.plastic/
+.idea/
+
 # Mac cache
 .DS_Store
 
