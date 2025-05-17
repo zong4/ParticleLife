@@ -15,8 +15,9 @@ namespace Systems
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
-            state.RequireForUpdate<ParticleSimulationConfigComponent>();
             state.RequireForUpdate<ColorConfigComponent>();
+            state.RequireForUpdate<ParticleSimulationConfigComponent>();
+            state.RequireForUpdate<BoundaryConfigComponent>();
 
             _particleQuery = SystemAPI.QueryBuilder().WithAll<Particle>().Build();
         }
@@ -28,6 +29,7 @@ namespace Systems
             if (!simulationComponent.SimulationEnabled) return;
 
             var colorComponent = SystemAPI.GetSingleton<ColorConfigComponent>();
+            var boundaryComponent = SystemAPI.GetSingleton<BoundaryConfigComponent>();
 
             var particles = _particleQuery.ToComponentDataArray<Particle>(Allocator.TempJob);
             var colorIndices = new NativeArray<int>(particles.Length, Allocator.TempJob);
@@ -51,10 +53,11 @@ namespace Systems
                 Velocities = velocities,
 
                 // Global
+                ColorComponent = colorComponent,
                 DeltaTime = deltaTime,
                 FrictionFactor = frictionFactor,
                 SimulationComponent = simulationComponent,
-                ColorComponent = colorComponent,
+                BoundaryComponent = boundaryComponent
             };
             job.ScheduleParallel(particles.Length, 64, state.Dependency).Complete();
 
@@ -82,10 +85,11 @@ namespace Systems
             public NativeArray<float2> Velocities;
 
             // Global
+            [ReadOnly] public ColorConfigComponent ColorComponent;
             [ReadOnly] public float DeltaTime;
             [ReadOnly] public float FrictionFactor;
             [ReadOnly] public ParticleSimulationConfigComponent SimulationComponent;
-            [ReadOnly] public ColorConfigComponent ColorComponent;
+            [ReadOnly] public BoundaryConfigComponent BoundaryComponent;
 
             public void Execute(int i)
             {
@@ -97,14 +101,24 @@ namespace Systems
                 {
                     if (i == j) continue;
 
-                    var dir = Positions[j] - posA;
+                    float2 dir;
+                    if (BoundaryComponent.BoundaryEnabled)
+                    {
+                        GetWrappedDelta(posA, Positions[j], BoundaryComponent.MinPosition,
+                            BoundaryComponent.MaxPosition, out dir);
+                    }
+                    else
+                    {
+                        dir = Positions[j] - posA;
+                    }
+
                     var dist = math.length(dir);
                     if (!(dist < SimulationComponent.MaxAttractionDistance)) continue;
 
                     var f = CalForce(dist / SimulationComponent.MaxAttractionDistance,
                         ColorComponent.AttractionMatrix.Value.Matrix[
                             colorIndexA * ColorComponent.ColorCount + ColorIndices[j]], 0.3f);
-                    totalForceDir += dir * (f / dist);
+                    totalForceDir += math.normalizesafe(dir) * f;
 
                     // {
                     //     var attrFactor = attraction * math.pow(1 - dist / maxDist, 1);
@@ -161,6 +175,21 @@ namespace Systems
             }
 
             return 0.0f;
+        }
+
+        [BurstCompile]
+        private static void GetWrappedDelta(in float2 a, in float2 b, in float2 min, in float2 max, out float2 result)
+        {
+            var size = max - min;
+            var delta = b - a;
+
+            if (delta.x > size.x / 2f) delta.x -= size.x;
+            else if (delta.x < -size.x / 2f) delta.x += size.x;
+
+            if (delta.y > size.y / 2f) delta.y -= size.y;
+            else if (delta.y < -size.y / 2f) delta.y += size.y;
+
+            result = delta;
         }
     }
 }

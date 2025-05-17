@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 502730040}
   - component: {fileID: 502730041}
   m_Layer: 0
-  m_Name: Bakers
+  m_Name: Configs
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

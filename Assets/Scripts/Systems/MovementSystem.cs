@@ -3,6 +3,7 @@ using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using UnityEngine;
 
 namespace Systems
 {
@@ -43,13 +44,11 @@ namespace Systems
                     var min = BoundaryComponent.MinPosition;
                     var max = BoundaryComponent.MaxPosition;
 
-                    // Wrap on X axis
-                    if (pos.x < min.x) pos.x = max.x;
-                    else if (pos.x > max.x) pos.x = min.x;
+                    var width = max.x - min.x;
+                    var height = max.y - min.y;
 
-                    // Wrap on Y axis
-                    if (pos.y < min.y) pos.y = max.y;
-                    else if (pos.y > max.y) pos.y = min.y;
+                    pos.x = min.x + math.fmod((pos.x - min.x + width), width);
+                    pos.y = min.y + math.fmod((pos.y - min.y + height), height);
                 }
 
                 particle.Position = pos;

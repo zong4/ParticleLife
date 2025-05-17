@@ -1,6 +1,8 @@
+using System.Globalization;
 using Components;
 using TMPro;
 using Unity.Entities;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace UI
@@ -18,16 +20,45 @@ namespace UI
         public TMP_InputField forceStrengthText;
         public TMP_InputField frictionHalfLifeText;
 
+        private float _forceStrength;
+
         private void Start()
         {
             _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-            _particleSimulationConfig = _entityManager.CreateEntityQuery(typeof(ParticleSimulationConfigComponent))
-                .GetSingletonEntity();
-            // _particleSimulationAuthoring = FindObjectOfType<ParticleSimulationConfigAuthoring>();
+        }
 
-            SetMaxAttractionDistanceUnit(maxAttractionDistanceText.text);
-            SetForceStrength(forceStrengthText.text);
-            SetFrictionHalfLife(frictionHalfLifeText.text);
+        private void Update()
+        {
+            if (_particleSimulationConfig == Entity.Null)
+            {
+                var query = _entityManager.CreateEntityQuery(typeof(ParticleSimulationConfigComponent));
+                if (query.IsEmpty)
+                    return;
+
+                _particleSimulationConfig = query.GetSingletonEntity();
+                // _particleSimulationAuthoring = FindObjectOfType<ParticleSimulationConfigAuthoring>();
+
+                SetMaxAttractionDistanceUnit(maxAttractionDistanceText.text);
+                SetForceStrength(forceStrengthText.text);
+                SetFrictionHalfLife(frictionHalfLifeText.text);
+            }
+
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                FlipSimulationState();
+            }
+
+            if (Input.GetKeyUp(KeyCode.Comma))
+            {
+                _forceStrength *= 0.5f;
+                UpdateForceText();
+            }
+
+            if (Input.GetKeyUp(KeyCode.Period))
+            {
+                _forceStrength *= 2f;
+                UpdateForceText();
+            }
         }
 
         public void FlipSimulationState()
@@ -57,6 +88,8 @@ namespace UI
             var data = _entityManager.GetComponentData<ParticleSimulationConfigComponent>(_particleSimulationConfig);
             data.ForceStrength = result;
             _entityManager.SetComponentData(_particleSimulationConfig, data);
+
+            _forceStrength = result;
         }
 
         public void SetFrictionHalfLife(string str)
@@ -65,7 +98,14 @@ namespace UI
 
             var data = _entityManager.GetComponentData<ParticleSimulationConfigComponent>(_particleSimulationConfig);
             data.FrictionHalfLife = result;
+            data.FrictionFactor = math.pow(0.5f, 0.3333333f / 0.04f);
             _entityManager.SetComponentData(_particleSimulationConfig, data);
+        }
+
+        private void UpdateForceText()
+        {
+            forceStrengthText.text = _forceStrength.ToString(CultureInfo.InvariantCulture);
+            SetForceStrength(forceStrengthText.text);
         }
     }
 }

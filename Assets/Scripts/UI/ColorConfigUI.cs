@@ -45,16 +45,24 @@ namespace UI
         private void Start()
         {
             _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-            _colorConfig = _entityManager.CreateEntityQuery(typeof(ColorConfigComponent)).GetSingletonEntity();
-
-            InitGameObjects();
-            UpdateTransforms();
-            SetColorCount();
-            SetAttractionMatrix();
         }
 
         private void Update()
         {
+            if (_colorConfig == Entity.Null)
+            {
+                var query = _entityManager.CreateEntityQuery(typeof(ColorConfigComponent));
+                if (query.IsEmpty)
+                    return;
+
+                _colorConfig = query.GetSingletonEntity();
+
+                InitGameObjects();
+                UpdateTransforms();
+                SetColorCount();
+                SetAttractionMatrix();
+            }
+
             if (Input.GetKeyUp(KeyCode.Escape))
             {
                 pickerIndex = -1;
@@ -64,6 +72,7 @@ namespace UI
             }
         }
 
+        // ReSharper disable Unity.PerformanceAnalysis
         private void InitGameObjects()
         {
             _indexCount = colors.Count + 2;
@@ -161,9 +170,9 @@ namespace UI
 
         private void Clear()
         {
-            if (_title != null) Destroy(_title);
-            if (_addButton != null) Destroy(_addButton);
-            if (_deleteButton != null) Destroy(_deleteButton);
+            if (_title) Destroy(_title);
+            if (_addButton) Destroy(_addButton.gameObject);
+            if (_deleteButton) Destroy(_deleteButton.gameObject);
 
             foreach (var button in _colorButtons)
             {
@@ -316,8 +325,6 @@ namespace UI
             _entityManager.SetComponentData(_colorConfig, data);
 
             // newBlob.Dispose();
-
-            Debug.Log("SetAttractionMatrix");
         }
 
         private BlobAssetReference<AttractionMatrixBlob> CreateAttractionMatrixBlob()

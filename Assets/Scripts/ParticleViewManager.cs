@@ -1,7 +1,6 @@
 using Unity.Entities;
 using UnityEngine;
 using System.Collections.Generic;
-using Authoring;
 using Components;
 using UI;
 
@@ -24,18 +23,18 @@ public class ParticleViewManager : MonoBehaviour
         _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
         // Properties
-        _scale = FindObjectOfType<ParticleSimulationConfigAuthoring>().scale;
+        // _scale = FindObjectOfType<ParticleSimulationConfigAuthoring>().scale;
         _colors = FindObjectOfType<ColorConfigUI>().colors;
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.M))
+        if (Input.GetKeyUp(KeyCode.M))
         {
             canvas.enabled = !canvas.enabled;
         }
 
-        if (Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyUp(KeyCode.R))
         {
             ClearEntities();
             ClearViews();
@@ -54,7 +53,7 @@ public class ParticleViewManager : MonoBehaviour
                 var go = Instantiate(particlePrefab, transform);
                 _views[entity] = go;
 
-                go.transform.localScale = new Vector3(_scale, _scale, _scale);
+                go.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
 
                 // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
                 go.GetComponent<SpriteRenderer>().color = _colors[data.ColorIndex];

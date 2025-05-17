@@ -8,7 +8,7 @@ namespace Bakers
     {
         public override void Bake(BoundaryConfigAuthoring authoring)
         {
-            var entity = GetEntity(TransformUsageFlags.None);
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
             AddComponent(entity,
                 new BoundaryConfigComponent
                 {
@@ -16,6 +16,8 @@ namespace Bakers
                     MinPosition = authoring.minPosition,
                     MaxPosition = authoring.maxPosition,
                 });
+
+            DependsOn(authoring.transform);
 
             UnityEngine.Debug.Log("BoundaryConfigBaker");
         }
