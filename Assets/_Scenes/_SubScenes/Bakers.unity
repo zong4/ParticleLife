@@ -197,7 +197,7 @@ MonoBehaviour:
   simulationEnabled: 0
   scale: 0.1
   maxAttractionDistanceUnit: 15
-  forceStrength: 0.1
+  forceStrength: 5
   frictionHalfLife: 0.04
 --- !u!114 &502730041
 MonoBehaviour:

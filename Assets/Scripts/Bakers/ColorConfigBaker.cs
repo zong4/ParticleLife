@@ -28,6 +28,7 @@ namespace Bakers
             AddComponent(entity,
                 new ColorConfigComponent() { ColorCount = authoring.colors.Length, AttractionMatrix = blobRef });
 
+            blobRef.Dispose();
             UnityEngine.Debug.Log("AttractionMatrixBaker");
         }
     }

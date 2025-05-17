@@ -816,6 +816,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   particlePrefab: {fileID: 1036452831230713672, guid: 437594c2cbcb84ff38eff84769c40993, type: 3}
+  colorConfig: {fileID: 2133062046}
 --- !u!4 &160146896
 Transform:
   m_ObjectHideFlags: 0
@@ -2842,7 +2843,7 @@ GameObject:
   - component: {fileID: 724443038}
   - component: {fileID: 724443037}
   m_Layer: 5
-  m_Name: Select
+  m_Name: Identity
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2912,9 +2913,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1979596251}
-        m_TargetAssemblyTypeName: UI.ParticleSpawnerUI, Assembly-CSharp
-        m_MethodName: SelectArea
+      - m_Target: {fileID: 2133062046}
+        m_TargetAssemblyTypeName: UI.ColorConfigUI, Assembly-CSharp
+        m_MethodName: GenerateIdentityMatrix
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4342,7 +4343,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "0.1\u200B"
+  m_text: "5\u200B"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -4844,7 +4845,7 @@ MonoBehaviour:
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
   m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
-  m_Text: 0.1
+  m_Text: 5
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
@@ -6402,7 +6403,7 @@ GameObject:
   - component: {fileID: 1527373402}
   - component: {fileID: 1527373401}
   m_Layer: 5
-  m_Name: Spawn
+  m_Name: Random
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6472,9 +6473,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1979596251}
-        m_TargetAssemblyTypeName: ParticleSpawner, Assembly-CSharp
-        m_MethodName: Spawn
+      - m_Target: {fileID: 2133062046}
+        m_TargetAssemblyTypeName: UI.ColorConfigUI, Assembly-CSharp
+        m_MethodName: GenerateRandomMatrix
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -6607,6 +6608,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   simulationEnabledText: {fileID: 1354406949}
+  colorConfig: {fileID: 2133062046}
 --- !u!1001 &1558538439
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8694,6 +8696,7 @@ MonoBehaviour:
   - {r: 0, g: 1, b: 0, a: 1}
   - {r: 0, g: 0, b: 1, a: 1}
   colorPicker: {fileID: 1558538441}
+  pickerIndex: -1
   title: {fileID: 1475067703663680037, guid: f6910627397f541f1bf55f9f3487dfc6, type: 3}
   addButton: {fileID: 7622021042110351421, guid: b0d000b0112314a0cbc2df7ec8820e69, type: 3}
   deleteButton: {fileID: 7622021042110351421, guid: 53f505629cb91431fbafaf2eeef69559, type: 3}

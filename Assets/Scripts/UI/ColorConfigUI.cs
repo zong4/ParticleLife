@@ -1,5 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
+using Components;
+using TMPro;
+using Unity.Collections;
+using Unity.Entities;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,7 +16,7 @@ namespace UI
         private int _virtualColorCount;
 
         public GameObject colorPicker;
-        private int _pickerIndex = -1;
+        public int pickerIndex = -1;
 
         public GameObject title;
         public GameObject addButton;
@@ -27,28 +32,41 @@ namespace UI
         private List<GameObject> _inputFields;
         private List<GameObject> _emptyRectTransforms;
 
-        private float[,] _attractionMatrix;
+        public float[,] AttractionMatrix;
+
+        private static EntityManager _entityManager;
+        private static Entity _colorConfig;
 
         private void Awake()
         {
             colorPicker.SetActive(false);
+        }
+
+        private void Start()
+        {
+            _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+            _colorConfig = _entityManager.CreateEntityQuery(typeof(ColorConfigComponent)).GetSingletonEntity();
 
             _virtualColorCount = colors.Count + 2;
             InitGameObjects();
             UpdateTransforms();
+            SetAttractionMatrix();
         }
 
         private void Update()
         {
             if (Input.GetKeyUp(KeyCode.Escape))
             {
-                _pickerIndex = -1;
+                pickerIndex = -1;
                 colorPicker.SetActive(false);
             }
         }
 
         private void InitGameObjects()
         {
+            var oldMatrix = AttractionMatrix;
+            AttractionMatrix = new float[colors.Count, colors.Count];
+
             _colorButtons = new List<GameObject>();
             _inputFields = new List<GameObject>();
             _emptyRectTransforms = new List<GameObject>();
@@ -77,9 +95,9 @@ namespace UI
                         else
                         {
                             var btn = Instantiate(colorButton, transform);
-                            btn.GetComponent<ColorButton>().colorIndex = r + c - 1;
                             btn.GetComponent<Image>().color = colors[r + c - 1];
-                            btn.GetComponent<Button>().onClick.AddListener(() => EnterPickColor(btn));
+                            btn.GetComponent<ColorButton>().colorIndex = r + c - 1;
+                            btn.GetComponent<ColorButton>().colorConfigUI = this;
                             _colorButtons.Add(btn);
                         }
 
@@ -88,7 +106,24 @@ namespace UI
 
                     if (r < _virtualColorCount - 1 && c < _virtualColorCount - 1)
                     {
-                        _inputFields.Add(Instantiate(inputField, transform));
+                        var i = r - 1;
+                        var j = c - 1;
+
+                        var go = Instantiate(inputField, transform);
+                        var input = go.GetComponent<MatrixInputField>();
+                        input.row = i;
+                        input.column = j;
+                        input.colorConfigUI = this;
+                        _inputFields.Add(go);
+
+                        if (oldMatrix != null && oldMatrix.GetLength(0) > i && oldMatrix.GetLength(0) > j)
+                        {
+                            AttractionMatrix[i, j] = oldMatrix[i, j];
+                        }
+                        else
+                        {
+                            AttractionMatrix[i, j] = i == j ? 1.0f : 0.0f;
+                        }
                     }
                     else
                     {
@@ -96,6 +131,8 @@ namespace UI
                     }
                 }
             }
+
+            UpdateInputFields();
         }
 
         [ContextMenu("Update Transforms")]
@@ -149,18 +186,11 @@ namespace UI
             _emptyRectTransforms.Clear();
         }
 
-        private void EnterPickColor(GameObject button)
-        {
-            _pickerIndex = button.GetComponent<ColorButton>().colorIndex;
-
-            colorPicker.SetActive(true);
-        }
-
         public void PickColor(Color color)
         {
-            if (_pickerIndex == -1) return;
+            if (pickerIndex == -1) return;
 
-            colors[_pickerIndex] = color;
+            colors[pickerIndex] = color;
             UpdateColor();
         }
 
@@ -182,6 +212,8 @@ namespace UI
             Clear();
             _virtualColorCount = colors.Count + 2;
             InitGameObjects();
+            SetColorCount();
+            SetAttractionMatrix();
             StartCoroutine(DelayedLayoutUpdate());
         }
 
@@ -189,6 +221,118 @@ namespace UI
         {
             yield return null;
             UpdateTransforms();
+        }
+
+        // ReSharper disable once UnusedMember.Local
+        private void ExpandIdentityMatrix(float[,] oldMatrix = null)
+        {
+            var oldColorCount = 0;
+            if (oldMatrix != null)
+                oldColorCount = oldMatrix.GetLength(0);
+
+            for (var i = 0; i < colors.Count; i++)
+            {
+                for (var j = 0; j < colors.Count; j++)
+                {
+                    if (oldMatrix != null && oldColorCount > i && oldColorCount > j)
+                    {
+                        AttractionMatrix[i, j] = oldMatrix[i, j];
+                    }
+                    else
+                    {
+                        AttractionMatrix[i, j] = i == j ? 1.0f : 0.0f;
+                    }
+                }
+            }
+        }
+
+        public void GenerateIdentityMatrix()
+        {
+            AttractionMatrix = new float[colors.Count, colors.Count];
+            for (var i = 0; i < colors.Count; i++)
+            {
+                for (var j = 0; j < colors.Count; j++)
+                {
+                    AttractionMatrix[i, j] = i == j ? 1.0f : 0.0f;
+                }
+            }
+
+            UpdateInputFields();
+        }
+
+        public void GenerateRandomMatrix()
+        {
+            AttractionMatrix = new float[colors.Count, colors.Count];
+            for (var i = 0; i < colors.Count; i++)
+            {
+                for (var j = 0; j < colors.Count; j++)
+                {
+                    AttractionMatrix[i, j] = Random.Range(-1f, 1f);
+                }
+            }
+
+            UpdateInputFields();
+        }
+
+        private void UpdateInputFields()
+        {
+            foreach (var input in _inputFields)
+            {
+                var matrixIndex = input.GetComponent<MatrixInputField>();
+                input.GetComponent<TMP_InputField>().text = AttractionMatrix[matrixIndex.row, matrixIndex.column]
+                    .ToString(CultureInfo.InvariantCulture);
+            }
+        }
+
+        private void SetColorCount()
+        {
+            var data = _entityManager.GetComponentData<ColorConfigComponent>(_colorConfig);
+            data.ColorCount = colors.Count;
+            _entityManager.SetComponentData(_colorConfig, data);
+        }
+
+        public void SetAttractionMatrix()
+        {
+            var newBlob = CreateAttractionMatrixBlob();
+
+            var data = _entityManager.GetComponentData<ColorConfigComponent>(_colorConfig);
+
+            // if (data.AttractionMatrix.IsCreated)
+            //     data.AttractionMatrix.Dispose();
+
+            data.AttractionMatrix = newBlob;
+            data.ColorCount = colors.Count;
+            _entityManager.SetComponentData(_colorConfig, data);
+
+            // newBlob.Dispose();
+        }
+
+        private BlobAssetReference<AttractionMatrixBlob> CreateAttractionMatrixBlob()
+        {
+            var size = AttractionMatrix.GetLength(0);
+            var total = size * size;
+
+            var builder = new BlobBuilder(Allocator.Temp);
+            ref var root = ref builder.ConstructRoot<AttractionMatrixBlob>();
+
+            var array = builder.Allocate(ref root.Matrix, total);
+            for (var i = 0; i < size; i++)
+            {
+                for (var j = 0; j < size; j++)
+                {
+                    array[i * size + j] = AttractionMatrix[i, j];
+                }
+            }
+
+            var blobAsset = builder.CreateBlobAssetReference<AttractionMatrixBlob>(Allocator.Temp);
+            builder.Dispose();
+
+            return blobAsset;
+        }
+
+        public void SetDelButtonInteractable(bool interactable)
+        {
+            _deleteButton.GetComponent<Button>().interactable = interactable;
         }
     }
 }

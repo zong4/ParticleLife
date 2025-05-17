@@ -16,6 +16,8 @@ public class ParticleViewManager : MonoBehaviour
     private float _scale;
     private List<Color> _colors;
 
+    public ColorConfigUI colorConfig;
+
     private void Start()
     {
         _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
@@ -27,6 +29,13 @@ public class ParticleViewManager : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            ClearEntities();
+            ClearViews();
+            colorConfig.SetDelButtonInteractable(true);
+        }
+
         var query = _entityManager.CreateEntityQuery(typeof(Particle));
         var entities = query.ToEntityArray(Unity.Collections.Allocator.Temp);
 
@@ -46,5 +55,21 @@ public class ParticleViewManager : MonoBehaviour
 
             _views[entity].transform.position = new Vector3(data.Position.x, data.Position.y, 0);
         }
+    }
+
+    private void ClearEntities()
+    {
+        var query = _entityManager.CreateEntityQuery(typeof(Particle));
+        _entityManager.DestroyEntity(query);
+    }
+
+    private void ClearViews()
+    {
+        foreach (var go in _views.Values)
+        {
+            Destroy(go);
+        }
+
+        _views.Clear();
     }
 }

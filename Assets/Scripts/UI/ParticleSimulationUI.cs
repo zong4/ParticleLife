@@ -1,4 +1,3 @@
-using Authoring;
 using Components;
 using TMPro;
 using Unity.Entities;
@@ -11,9 +10,11 @@ namespace UI
         private static EntityManager _entityManager;
 
         private static Entity _particleSimulationConfig;
-        private static ParticleSimulationConfigAuthoring _particleSimulationAuthoring;
+        // private static ParticleSimulationConfigAuthoring _particleSimulationAuthoring;
 
         public TextMeshProUGUI simulationEnabledText;
+
+        public ColorConfigUI colorConfig;
 
         private void Start()
         {
@@ -21,16 +22,16 @@ namespace UI
 
             _particleSimulationConfig = _entityManager.CreateEntityQuery(typeof(ParticleSimulationConfigComponent))
                 .GetSingletonEntity();
-            _particleSimulationAuthoring = FindObjectOfType<ParticleSimulationConfigAuthoring>();
+            // _particleSimulationAuthoring = FindObjectOfType<ParticleSimulationConfigAuthoring>();
         }
 
         public void FlipSimulationState()
         {
+            colorConfig.SetDelButtonInteractable(false);
+
             var data = _entityManager.GetComponentData<ParticleSimulationConfigComponent>(_particleSimulationConfig);
             data.SimulationEnabled = !data.SimulationEnabled;
             _entityManager.SetComponentData(_particleSimulationConfig, data);
-
-            _particleSimulationAuthoring.simulationEnabled = data.SimulationEnabled;
 
             simulationEnabledText.text = data.SimulationEnabled ? "Simulate" : "Pause";
         }
@@ -42,8 +43,6 @@ namespace UI
             var data = _entityManager.GetComponentData<ParticleSimulationConfigComponent>(_particleSimulationConfig);
             data.MaxAttractionDistance = result;
             _entityManager.SetComponentData(_particleSimulationConfig, data);
-
-            _particleSimulationAuthoring.maxAttractionDistanceUnit = data.MaxAttractionDistance;
         }
 
         public void SetForceStrength(string str)
@@ -53,8 +52,6 @@ namespace UI
             var data = _entityManager.GetComponentData<ParticleSimulationConfigComponent>(_particleSimulationConfig);
             data.ForceStrength = result;
             _entityManager.SetComponentData(_particleSimulationConfig, data);
-
-            _particleSimulationAuthoring.forceStrength = data.ForceStrength;
         }
 
         public void SetFrictionHalfLife(string str)
@@ -64,8 +61,6 @@ namespace UI
             var data = _entityManager.GetComponentData<ParticleSimulationConfigComponent>(_particleSimulationConfig);
             data.FrictionHalfLife = result;
             _entityManager.SetComponentData(_particleSimulationConfig, data);
-
-            _particleSimulationAuthoring.frictionHalfLife = data.FrictionHalfLife;
         }
     }
 }
