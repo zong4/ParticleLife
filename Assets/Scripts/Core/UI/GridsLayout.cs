@@ -3,12 +3,13 @@ using UnityEngine;
 namespace Core.UI
 {
     [ExecuteInEditMode]
-    public class GridLayout : MonoBehaviour
+    public class GridsLayout : MonoBehaviour
     {
         public int rowNumber;
         public int columnNumber;
 
-        private void Update()
+        [ContextMenu("Update Transforms")]
+        public void UpdateTransforms()
         {
             for (var i = 0; i < rowNumber; i++)
             {

@@ -10,6 +10,11 @@ namespace Bakers
         public override void Bake(ParticleSimulationConfigAuthoring authoring)
         {
             var entity = GetEntity(TransformUsageFlags.None);
+
+            // ColorConfigComponent
+            AddComponent(entity, new ColorConfigComponent { ColorCount = 3 });
+
+            // ParticleSimulationConfigComponent
             AddComponent(entity, new ParticleSimulationConfigComponent()
             {
                 SimulationEnabled = authoring.simulationEnabled,

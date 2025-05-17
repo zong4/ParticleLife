@@ -13,7 +13,7 @@ namespace UI
     public class ColorConfigUI : MonoBehaviour
     {
         public List<Color> colors;
-        private int _virtualColorCount;
+        private int _indexCount;
 
         public GameObject colorPicker;
         public int pickerIndex = -1;
@@ -26,8 +26,8 @@ namespace UI
         public GameObject emptyRectTransform;
 
         private GameObject _title;
-        private GameObject _addButton;
-        private GameObject _deleteButton;
+        private Button _addButton;
+        private Button _deleteButton;
         private List<GameObject> _colorButtons;
         private List<GameObject> _inputFields;
         private List<GameObject> _emptyRectTransforms;
@@ -47,9 +47,9 @@ namespace UI
             _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
             _colorConfig = _entityManager.CreateEntityQuery(typeof(ColorConfigComponent)).GetSingletonEntity();
 
-            _virtualColorCount = colors.Count + 2;
             InitGameObjects();
             UpdateTransforms();
+            SetColorCount();
             SetAttractionMatrix();
         }
 
@@ -58,21 +58,25 @@ namespace UI
             if (Input.GetKeyUp(KeyCode.Escape))
             {
                 pickerIndex = -1;
+
+                // Close the color picker
                 colorPicker.SetActive(false);
             }
         }
 
         private void InitGameObjects()
         {
+            _indexCount = colors.Count + 2;
+
             var oldMatrix = AttractionMatrix;
             AttractionMatrix = new float[colors.Count, colors.Count];
 
             _colorButtons = new List<GameObject>();
             _inputFields = new List<GameObject>();
             _emptyRectTransforms = new List<GameObject>();
-            for (var r = 0; r < _virtualColorCount; r++)
+            for (var r = 0; r < _indexCount; r++)
             {
-                for (var c = 0; c < _virtualColorCount; c++)
+                for (var c = 0; c < _indexCount; c++)
                 {
                     if (r == 0 && c == 0)
                     {
@@ -82,38 +86,43 @@ namespace UI
 
                     if (r == 0 || c == 0)
                     {
-                        if (r == _virtualColorCount - 1)
+                        if (r == _indexCount - 1)
                         {
-                            _deleteButton = Instantiate(deleteButton, transform);
-                            _deleteButton.GetComponent<Button>().onClick.AddListener(DelColor);
+                            _deleteButton = Instantiate(deleteButton, transform).GetComponent<Button>();
+                            _deleteButton.onClick.AddListener(DelColor);
                         }
-                        else if (c == _virtualColorCount - 1)
+                        else if (c == _indexCount - 1)
                         {
-                            _addButton = Instantiate(addButton, transform);
-                            _addButton.GetComponent<Button>().onClick.AddListener(AddColor);
+                            _addButton = Instantiate(addButton, transform).GetComponent<Button>();
+                            _addButton.onClick.AddListener(AddColor);
                         }
                         else
                         {
                             var btn = Instantiate(colorButton, transform);
+
                             btn.GetComponent<Image>().color = colors[r + c - 1];
-                            btn.GetComponent<ColorButton>().colorIndex = r + c - 1;
+
                             btn.GetComponent<ColorButton>().colorConfigUI = this;
+                            btn.GetComponent<ColorButton>().colorIndex = r + c - 1;
+
                             _colorButtons.Add(btn);
                         }
 
                         continue;
                     }
 
-                    if (r < _virtualColorCount - 1 && c < _virtualColorCount - 1)
+                    if (r < _indexCount - 1 && c < _indexCount - 1)
                     {
                         var i = r - 1;
                         var j = c - 1;
 
                         var go = Instantiate(inputField, transform);
+
                         var input = go.GetComponent<MatrixInputField>();
+                        input.colorConfigUI = this;
                         input.row = i;
                         input.column = j;
-                        input.colorConfigUI = this;
+
                         _inputFields.Add(go);
 
                         if (oldMatrix != null && oldMatrix.GetLength(0) > i && oldMatrix.GetLength(0) > j)
@@ -135,28 +144,18 @@ namespace UI
             UpdateInputFields();
         }
 
+        // ReSharper disable Unity.PerformanceAnalysis
         [ContextMenu("Update Transforms")]
         public void UpdateTransforms()
         {
-            for (var i = 0; i < _virtualColorCount; i++)
+            for (var i = 0; i < _indexCount; i++)
             {
-                for (var j = 0; j < _virtualColorCount; j++)
+                for (var j = 0; j < _indexCount; j++)
                 {
-                    var rectTransform = transform.GetChild(i * _virtualColorCount + j).GetComponent<RectTransform>();
-                    rectTransform.anchorMin = new Vector2((float)j / _virtualColorCount,
-                        1 - (float)(i + 1) / _virtualColorCount);
-                    rectTransform.anchorMax = new Vector2((float)(j + 1) / _virtualColorCount,
-                        1 - (float)i / _virtualColorCount);
+                    var rectTransform = transform.GetChild(i * _indexCount + j).GetComponent<RectTransform>();
+                    rectTransform.anchorMin = new Vector2((float)j / _indexCount, 1 - (float)(i + 1) / _indexCount);
+                    rectTransform.anchorMax = new Vector2((float)(j + 1) / _indexCount, 1 - (float)i / _indexCount);
                 }
-            }
-        }
-
-        private void UpdateColor()
-        {
-            if (_colorButtons == null) return;
-            foreach (var button in _colorButtons)
-            {
-                button.GetComponent<Image>().color = colors[button.GetComponent<ColorButton>().colorIndex];
             }
         }
 
@@ -194,6 +193,16 @@ namespace UI
             UpdateColor();
         }
 
+        private void UpdateColor()
+        {
+            if (_colorButtons == null) return;
+
+            foreach (var button in _colorButtons)
+            {
+                button.GetComponent<Image>().color = colors[button.GetComponent<ColorButton>().colorIndex];
+            }
+        }
+
         private void AddColor()
         {
             colors.Add(colors[^1]);
@@ -202,7 +211,7 @@ namespace UI
 
         private void DelColor()
         {
-            if (colors.Count <= 1) return;
+            if (colors.Count < 2) return;
             colors.RemoveAt(colors.Count - 1);
             Rebuild();
         }
@@ -210,7 +219,7 @@ namespace UI
         private void Rebuild()
         {
             Clear();
-            _virtualColorCount = colors.Count + 2;
+
             InitGameObjects();
             SetColorCount();
             SetAttractionMatrix();
@@ -257,6 +266,7 @@ namespace UI
                 }
             }
 
+            SetAttractionMatrix();
             UpdateInputFields();
         }
 
@@ -271,6 +281,7 @@ namespace UI
                 }
             }
 
+            SetAttractionMatrix();
             UpdateInputFields();
         }
 
@@ -305,6 +316,8 @@ namespace UI
             _entityManager.SetComponentData(_colorConfig, data);
 
             // newBlob.Dispose();
+
+            Debug.Log("SetAttractionMatrix");
         }
 
         private BlobAssetReference<AttractionMatrixBlob> CreateAttractionMatrixBlob()
@@ -332,7 +345,7 @@ namespace UI
 
         public void SetDelButtonInteractable(bool interactable)
         {
-            _deleteButton.GetComponent<Button>().interactable = interactable;
+            _deleteButton.interactable = interactable;
         }
     }
 }

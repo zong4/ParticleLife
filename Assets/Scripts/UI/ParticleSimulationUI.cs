@@ -7,22 +7,27 @@ namespace UI
 {
     public class ParticleSimulationUI : MonoBehaviour
     {
-        private static EntityManager _entityManager;
+        public ColorConfigUI colorConfig;
 
+        private static EntityManager _entityManager;
         private static Entity _particleSimulationConfig;
         // private static ParticleSimulationConfigAuthoring _particleSimulationAuthoring;
 
         public TextMeshProUGUI simulationEnabledText;
-
-        public ColorConfigUI colorConfig;
+        public TMP_InputField maxAttractionDistanceText;
+        public TMP_InputField forceStrengthText;
+        public TMP_InputField frictionHalfLifeText;
 
         private void Start()
         {
             _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-
             _particleSimulationConfig = _entityManager.CreateEntityQuery(typeof(ParticleSimulationConfigComponent))
                 .GetSingletonEntity();
             // _particleSimulationAuthoring = FindObjectOfType<ParticleSimulationConfigAuthoring>();
+
+            SetMaxAttractionDistanceUnit(maxAttractionDistanceText.text);
+            SetForceStrength(forceStrengthText.text);
+            SetFrictionHalfLife(frictionHalfLifeText.text);
         }
 
         public void FlipSimulationState()

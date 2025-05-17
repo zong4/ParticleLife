@@ -43,6 +43,7 @@ namespace Core.UI
             }
         }
 
+        // Maybe use context menu to update
         private void Update()
         {
             var totalSize = 0f;

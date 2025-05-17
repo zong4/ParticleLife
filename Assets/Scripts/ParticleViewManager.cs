@@ -8,7 +8,6 @@ using UI;
 public class ParticleViewManager : MonoBehaviour
 {
     private EntityManager _entityManager;
-
     public GameObject particlePrefab;
     private readonly Dictionary<Entity, GameObject> _views = new();
 
@@ -16,6 +15,8 @@ public class ParticleViewManager : MonoBehaviour
     private float _scale;
     private List<Color> _colors;
 
+    // Extend functionality
+    public Canvas canvas;
     public ColorConfigUI colorConfig;
 
     private void Start()
@@ -29,16 +30,22 @@ public class ParticleViewManager : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            canvas.enabled = !canvas.enabled;
+        }
+
         if (Input.GetKeyDown(KeyCode.R))
         {
             ClearEntities();
             ClearViews();
+
+            // DelButton
             colorConfig.SetDelButtonInteractable(true);
         }
 
         var query = _entityManager.CreateEntityQuery(typeof(Particle));
         var entities = query.ToEntityArray(Unity.Collections.Allocator.Temp);
-
         foreach (var entity in entities)
         {
             var data = _entityManager.GetComponentData<Particle>(entity);

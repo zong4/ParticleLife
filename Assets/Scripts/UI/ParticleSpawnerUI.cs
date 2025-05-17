@@ -50,7 +50,7 @@ namespace UI
             if (_isSelectingEnd)
             {
                 _endPos = Input.mousePosition;
-                _rect = GetScreenRect(_startPos, _endPos);
+                _rect = DrawRect.GetScreenRect(_startPos, _endPos);
 
                 if (Input.GetMouseButtonUp(0))
                 {
@@ -66,9 +66,16 @@ namespace UI
             }
         }
 
+        private void OnGUI()
+        {
+            if (_rect == default) return;
+            DrawRect.DrawScreenRectBorder(_rect, 2, Color.yellow);
+        }
+
         public void SetCount(string str)
         {
             if (!int.TryParse(str, out var result)) return;
+
             _count = result;
         }
 
@@ -99,36 +106,6 @@ namespace UI
             _entityManager.AddComponentData(e, request);
 
             _rect = default;
-        }
-
-        private void OnGUI()
-        {
-            if (_rect == default) return;
-            DrawScreenRectBorder(_rect, 2, Color.yellow);
-        }
-
-        private static Rect GetScreenRect(Vector2 screenPosition1, Vector2 screenPosition2)
-        {
-            var x = Mathf.Min(screenPosition1.x, screenPosition2.x);
-            var y = Screen.height - Mathf.Max(screenPosition1.y, screenPosition2.y);
-            var width = Mathf.Abs(screenPosition1.x - screenPosition2.x);
-            var height = Mathf.Abs(screenPosition1.y - screenPosition2.y);
-            return new Rect(x, y, width, height);
-        }
-
-        private static void DrawScreenRectBorder(Rect rect, float thickness, Color color)
-        {
-            DrawScreenRect(new Rect(rect.xMin, rect.yMin, rect.width, thickness), color);
-            DrawScreenRect(new Rect(rect.xMin, rect.yMax - thickness, rect.width, thickness), color);
-            DrawScreenRect(new Rect(rect.xMin, rect.yMin, thickness, rect.height), color);
-            DrawScreenRect(new Rect(rect.xMax - thickness, rect.yMin, thickness, rect.height), color);
-        }
-
-        private static void DrawScreenRect(Rect rect, Color color)
-        {
-            GUI.color = color;
-            GUI.DrawTexture(rect, Texture2D.whiteTexture);
-            GUI.color = Color.white;
         }
     }
 }

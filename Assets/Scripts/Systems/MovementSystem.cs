@@ -42,17 +42,14 @@ namespace Systems
                 {
                     var min = BoundaryComponent.MinPosition;
                     var max = BoundaryComponent.MaxPosition;
-                    if (pos.x < min.x || pos.x > max.x)
-                    {
-                        particle.Velocity.x = 0;
-                        pos.x = math.clamp(pos.x, min.x, max.x);
-                    }
 
-                    if (pos.y < min.y || pos.y > max.y)
-                    {
-                        particle.Velocity.y = 0;
-                        pos.y = math.clamp(pos.y, min.y, max.y);
-                    }
+                    // Wrap on X axis
+                    if (pos.x < min.x) pos.x = max.x;
+                    else if (pos.x > max.x) pos.x = min.x;
+
+                    // Wrap on Y axis
+                    if (pos.y < min.y) pos.y = max.y;
+                    else if (pos.y > max.y) pos.y = min.y;
                 }
 
                 particle.Position = pos;

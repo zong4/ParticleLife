@@ -10,7 +10,7 @@ namespace Bakers
         {
             var entity = GetEntity(TransformUsageFlags.None);
             AddComponent(entity,
-                new BoundaryConfigComponent()
+                new BoundaryConfigComponent
                 {
                     BoundaryEnabled = authoring.boundaryEnabled,
                     MinPosition = authoring.minPosition,

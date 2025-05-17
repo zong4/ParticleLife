@@ -5,8 +5,7 @@ public class CameraController : MonoBehaviour
     public float movementSpeed = 10f;
 
     public float zoomSpeed = 2f;
-    // public float minZoom = 5f;
-    // public float maxZoom = 20f;
+    public Vector2 zoomRange = new(3f, 25f);
 
     private Camera _cam;
 
@@ -25,7 +24,6 @@ public class CameraController : MonoBehaviour
     {
         var horizontal = Input.GetAxis("Horizontal") * movementSpeed * Time.deltaTime;
         var vertical = Input.GetAxis("Vertical") * movementSpeed * Time.deltaTime;
-
         transform.Translate(new Vector3(horizontal, vertical, 0));
     }
 
@@ -33,7 +31,7 @@ public class CameraController : MonoBehaviour
     {
         var scroll = Input.GetAxis("Mouse ScrollWheel");
         _cam.orthographicSize -= scroll * zoomSpeed;
-        // _cam.orthographicSize = Mathf.Clamp(_cam.orthographicSize, minZoom, maxZoom);
+        _cam.orthographicSize = Mathf.Clamp(_cam.orthographicSize, zoomRange.x, zoomRange.y);
     }
 
     public void SetMovementSpeed(string str)

@@ -29,6 +29,7 @@ namespace Core.UI
             yMaxAnchor = _rectTransform.anchorMax.y;
         }
 
+        // Maybe use context menu to update
         private void Update()
         {
             if (isLRSymmetrical) xMaxAnchor = 1 - xMinAnchor;

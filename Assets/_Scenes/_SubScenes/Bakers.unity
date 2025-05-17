@@ -132,7 +132,6 @@ GameObject:
   m_Component:
   - component: {fileID: 502730036}
   - component: {fileID: 502730040}
-  - component: {fileID: 502730039}
   - component: {fileID: 502730041}
   m_Layer: 0
   m_Name: Bakers
@@ -156,32 +155,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &502730039
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 502730035}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bf74942bb4e5405e836b178103bec371, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  colors:
-  - {r: 1, g: 0, b: 0, a: 1}
-  - {r: 0, g: 1, b: 0, a: 1}
-  - {r: 0, g: 0, b: 1, a: 1}
-  matrix:
-  - 0.80131936
-  - 0.66811943
-  - -0.88812256
-  - 0.8302047
-  - -0.7537377
-  - 0.45739576
-  - 0.76773787
-  - -0.6879835
-  - -0.66169167
 --- !u!114 &502730040
 MonoBehaviour:
   m_ObjectHideFlags: 0
